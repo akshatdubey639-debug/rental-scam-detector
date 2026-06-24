@@ -46,7 +46,6 @@ export default function AuthPage() {
     setLoading(true);
 
     try {
-      const endpoint = isLogin ? "/auth/login" : "/auth/signup";
       
       const payload = {
         email: formData.email,
