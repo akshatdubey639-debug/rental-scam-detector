@@ -51,7 +51,7 @@ export default function AuthPage() {
       };
 
       // 🔥 FIXED ENDPOINT (IMPORTANT)
-      const endpoint = `${import.meta.env.VITE_API_URL}${isLogin ? "/auth/login" : "/auth/register"}`;
+      const endpoint = `${import.meta.env.VITE_API_URL}${isLogin ? "/login" : "/signup"}`;
 
       const res = await axios.post(endpoint, payload);
       const data = res.data;
