@@ -8,7 +8,7 @@ export default function AuthPage() {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -27,18 +27,16 @@ export default function AuthPage() {
     e.preventDefault();
     setError("");
 
-    // Basic Validation
+    // Validation
     if (!formData.email || !formData.password || (!isLogin && !formData.name)) {
       return setError("All fields are required.");
     }
-    
-    // Basic Email Validation
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       return setError("Please provide a valid email address.");
     }
 
-    // Frontend password check
     if (!isLogin && formData.password.length < 6) {
       return setError("Password must be at least 6 characters.");
     }
@@ -46,24 +44,27 @@ export default function AuthPage() {
     setLoading(true);
 
     try {
-      
       const payload = {
         email: formData.email,
         password: formData.password,
-        ...( !isLogin && { name: formData.name } )
+        ...(!isLogin && { name: formData.name })
       };
+
+      // 🔥 FIXED ENDPOINT (IMPORTANT)
+      const endpoint = `${import.meta.env.VITE_API_URL}${isLogin ? "/auth/login" : "/auth/register"}`;
 
       const res = await axios.post(endpoint, payload);
       const data = res.data;
 
-      // Axios throws for 4xx/5xx, so if we're here, it's successful
       login(data.token, data.user);
       navigate("/analyze");
 
     } catch (err) {
       console.error("Auth error:", err);
-      // Handle Axios errors safely and display backend message
-      const errorMessage = err.response?.data?.message || err.message || "An unexpected error occurred.";
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "An unexpected error occurred.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -73,8 +74,7 @@ export default function AuthPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        
-        {/* Toggle / Header */}
+
         <div className="auth-header">
           <div className="auth-brand-icon">🛡️</div>
           <h2>{isLogin ? "Welcome Back" : "Create Account"}</h2>
@@ -82,15 +82,16 @@ export default function AuthPage() {
         </div>
 
         <div className="auth-tabs">
-          <button 
+          <button
             type="button"
             className={`auth-tab ${isLogin ? "active" : ""}`}
             onClick={() => !isLogin && toggleMode()}
           >
             Login
           </button>
-          <button 
-            type="button" 
+
+          <button
+            type="button"
             className={`auth-tab ${!isLogin ? "active" : ""}`}
             onClick={() => isLogin && toggleMode()}
           >
@@ -98,15 +99,13 @@ export default function AuthPage() {
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="auth-form" noValidate>
           {error && <div className="auth-error">{error}</div>}
 
           {!isLogin && (
             <div className="auth-field">
-              <label htmlFor="name">Full Name</label>
+              <label>Full Name</label>
               <input
-                id="name"
                 name="name"
                 type="text"
                 placeholder="John Doe"
@@ -118,9 +117,8 @@ export default function AuthPage() {
           )}
 
           <div className="auth-field">
-            <label htmlFor="email">Email Address</label>
+            <label>Email Address</label>
             <input
-              id="email"
               name="email"
               type="email"
               placeholder="you@example.com"
@@ -131,9 +129,8 @@ export default function AuthPage() {
           </div>
 
           <div className="auth-field">
-            <label htmlFor="password">Password</label>
+            <label>Password</label>
             <input
-              id="password"
               name="password"
               type="password"
               placeholder="••••••••"
@@ -144,16 +141,10 @@ export default function AuthPage() {
           </div>
 
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? (
-              <span className="spinner-small" />
-            ) : isLogin ? (
-              "Log In"
-            ) : (
-              "Sign Up"
-            )}
+            {loading ? <span className="spinner-small" /> : isLogin ? "Log In" : "Sign Up"}
           </button>
         </form>
-        
+
       </div>
     </div>
   );
